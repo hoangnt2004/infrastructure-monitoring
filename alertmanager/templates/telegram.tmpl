@@ -1,0 +1,24 @@
+{{ define "telegram.message" -}}
+{{ if eq .Status "firing" -}}
+🚨 *INFRASTRUCTURE ALERT*
+
+*Status:* FIRING
+{{ else -}}
+✅ *INFRASTRUCTURE RECOVERED*
+
+*Status:* RESOLVED
+{{ end }}
+
+{{ range .Alerts -}}
+*Alert:* {{ .Labels.alertname }}
+*Severity:* {{ .Labels.severity }}
+*Job:* {{ .Labels.job }}
+*Instance:* {{ .Labels.instance }}
+
+*Summary:*
+{{ .Annotations.summary }}
+
+*Description:*
+{{ .Annotations.description }}
+{{ end }}
+{{- end }}
