@@ -1,0 +1,104 @@
+groups:
+  - name: linux-resource-alerts
+    rules:
+      - alert: LinuxHighCPU
+        expr: |
+          100 - (
+            avg by(instance) (
+              rate(node_cpu_seconds_total{
+                job="linux",
+                mode="idle"
+              }[5m])
+            ) * 100
+          ) > 85
+        for: 5m
+        labels:
+          severity: warning
+          os: linux
+        annotations:
+          summary: "High CPU usage on Linux {{ $labels.instance }}"
+          description: "CPU usage has been above 85% for more than 5 minutes."
+
+      - alert: LinuxHighMemory
+        expr: |
+          100 * (
+            1 - (
+              node_memory_MemAvailable_bytes{job="linux"}
+              /
+              node_memory_MemTotal_bytes{job="linux"}
+            )
+          ) > 90
+        for: 5m
+        labels:
+          severity: warning
+          os: linux
+        annotations:
+          summary: "High memory usage on Linux {{ $labels.instance }}"
+          description: "Memory usage has been above 90% for more than 5 minutes."
+
+      - alert: LinuxLowDisk
+        expr: |
+          100 * (
+            node_filesystem_avail_bytes{job="linux"}
+            /
+            node_filesystem_size_bytes{job="linux"}
+          ) < 15
+        for: 10m
+        labels:
+          severity: warning
+          os: linux
+        annotations:
+          summary: "Low disk space on Linux {{ $labels.instance }}"
+          description: "Filesystem {{ $labels.mountpoint }} has less than 15% free space."
+
+  - name: windows-resource-alerts
+    rules:
+      - alert: WindowsHighCPU
+        expr: |
+          100 - (
+            avg by(instance) (
+              rate(windows_cpu_time_total{
+                job="windows",
+                mode="idle"
+              }[5m])
+            ) * 100
+          ) > 85
+        for: 5m
+        labels:
+          severity: warning
+          os: windows
+        annotations:
+          summary: "High CPU usage on Windows {{ $labels.instance }}"
+          description: "CPU usage has been above 85% for more than 5 minutes."
+
+      - alert: WindowsHighMemory
+        expr: |
+          100 * (
+            1 - (
+              windows_memory_physical_free_bytes{job="windows"}
+              /
+              windows_memory_physical_total_bytes{job="windows"}
+            )
+          ) > 90
+        for: 5m
+        labels:
+          severity: warning
+          os: windows
+        annotations:
+          summary: "High memory usage on Windows {{ $labels.instance }}"
+          description: "Memory usage has been above 90% for more than 5 minutes."
+
+      - alert: WindowsLowDisk
+        expr: |
+          100 * (
+            windows_logical_disk_free_bytes{job="windows"}
+            /
+            windows_logical_disk_size_bytes{job="windows"}
+          ) < 15
+        for: 10m
+        labels:
+          severity: warning
+          os: windows
+        annotations:
+          summary: "Low disk space on Windows {{ $labels.instance }}"
+          description: "Drive {{ $labels.volume }} has less than 15% free space."
